@@ -8,12 +8,12 @@ Its second job matters more than the first: because the crawl computes catalog q
 signals from public data, each prospect row carries a `pitch_line` — the exact defect stat
 that opens the cold email. The research output *is* the outbound campaign.
 
-> **This directory is meant to live in its own repository.** CW-RES-001 §1 specifies
-> `frito1-design/cogwright-market-research`. The session that wrote it could not create
-> that repo — the GitHub app returned `403 Resource not accessible by integration` — so it
-> landed here instead. It is entirely self-contained: create the repo and move this
-> directory to its root, unchanged. Nothing here imports from or writes to the surrounding
-> project.
+> **Provenance.** Per CW-RES-001 §1 this belongs in its own repository. It was first
+> written into `frito1-design/FFF-Ninja-Master` under `cogwright-market-research/`, because
+> the session that built it lacked permission to create a repository, then split out here
+> with `git subtree split` so the original history is preserved. Once this repo is pushed,
+> delete `cogwright-market-research/` from FFF-Ninja-Master — two copies is one too many,
+> and the one over there is the one that will go stale.
 
 ## Status: built, not yet run
 
