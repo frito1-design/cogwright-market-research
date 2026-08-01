@@ -1,183 +1,306 @@
 # Brand dealer locators — Stage 1 primary source (CW-RES-001 §3).
 #
-# READ THIS BEFORE THE FIRST RUN.
+# STATE OF THIS FILE
 #
-# Every `url` below is UNVERIFIED (`verified: false`). They were written from the brand
-# list in §3 without network access to confirm them, so treat each as a starting guess,
-# not a fact. Dealer locators move, and a good share of them are JavaScript front-ends
-# over a JSON endpoint that this file cannot know the shape of until someone opens the
-# page with devtools.
+# Every URL below has been checked against a web search index: the URL exists and is the
+# brand's dealer/store locator. That is `url_confirmed: true`. Of the 30 entries, 2 of the
+# original guesses were right and 27 were wrong and have been corrected — so this pass was
+# worth doing, and the pre-correction file would have produced a near-empty universe.
 #
-# Working procedure for each brand:
-#   1. Open the locator in a browser and confirm it lists retailers with websites.
-#   2. If the dealer list arrives over XHR, switch `kind` to `json`, set `array_path`
-#      and `website_key` from the payload, and point `url` at the endpoint.
-#   3. Set `verified: true`.
+# `verified` is still false everywhere, and it means something stricter: nobody has opened
+# the page and confirmed it lists retailers *with website links*, or determined whether the
+# list is in the HTML or arrives over XHR. That check needs a browser and could not be done
+# from the environment that wrote this (no outbound network — see docs/RUN_STATUS.md).
 #
-# `harvest_locator` fetches these through the same polite client as everything else, so
-# a wrong URL costs one 404 and a log line, not a rate-limit ban. Unverified entries are
-# still harvested — a wrong guess is cheap and a right one is free.
+# So: the addresses are now right, the payload shapes are still unknown.
 #
-# The point of recording which locators a domain appeared on is that the list is itself a
-# scoring input: a shop on the Simms *and* Fishpond *and* Sage locators has a vendor mix
-# Cogwright already has mappings for, and 8+ appearances earns the §8 modifier.
+# REMAINING WORK, per brand:
+#   1. Open the URL. Confirm it lists retailers and that entries carry website links — a
+#      locator giving only name/address/phone is useless here, since Stage 2 needs a
+#      domain. Set `verified: true` when it does.
+#   2. If the dealer list arrives over XHR (watch the network tab), switch `kind` to `json`,
+#      point `url` at the endpoint, and set `array_path` / `website_key` from the payload.
+#   3. If a locator only returns results near a searched location rather than a full list,
+#      note it — those need repeated queries across metros, which `harvest_locator` does
+#      not do today.
+#
+# Three third-party locator widgets recur, and all three mean `kind: json` work:
+#   - Locally (locally.com)  — Sage, Smith
+#   - Storemapper            — Umpqua
+#   - Google Maps embeds     — Scott, Winston
+# Identifying the widget usually finds the endpoint faster than reading the page.
+#
+# `harvest_locator` fetches these through the same polite client as everything else, so a
+# wrong URL costs one 404 and a log line. Unverified entries are still harvested.
+#
+# Recording which locators a domain appeared on is itself a scoring input: a shop on the
+# Simms *and* Fishpond *and* Sage locators has a vendor mix Cogwright already has mappings
+# for, and 8+ appearances earns the §8 modifier.
 
 locators:
   - name: simms
     url: https://www.simmsfishing.com/pages/dealer-locator
     kind: html
+    url_confirmed: true
     verified: false
+    notes: original guess was correct; /pages/store-locator also exists
 
   - name: sage
-    url: https://sageflyfish.com/pages/dealer-locator
+    url: https://www.sageflyfish.com/locations
     kind: html
+    url_confirmed: true
     verified: false
+    notes: >-
+      corrected from sageflyfish.com/pages/dealer-locator. Uses the Locally (locally.com)
+      store-locator widget, so expect kind:json. Far Bank brand — the shared
+      farbank.com/pages/dealer-locator may cover Sage, RIO and Redington together.
 
   - name: scott
-    url: https://www.scottflyrod.com/pages/dealers
+    url: https://www.scottflyrod.com/find-a-dealer/
     kind: html
+    url_confirmed: true
     verified: false
+    notes: >-
+      corrected from /pages/dealers. Google Maps integration. scottflyrod.com/dealer/ is a
+      "Dealers Archive" listing and may be the easier plain-HTML harvest — check it first.
 
   - name: winston
-    url: https://winstonrods.com/pages/dealers
+    url: https://winstonrods.com/company/dealers/dealer-locator/
     kind: html
+    url_confirmed: true
     verified: false
+    notes: >-
+      corrected from /pages/dealers. Radius search by city/state/postal.
+      /company/dealers/online-dealers/ is a separate list worth harvesting too.
 
   - name: thomas_and_thomas
-    url: https://thomasandthomas.com/pages/dealers
+    url: https://thomasandthomas.com/pages/store-locations
     kind: html
+    url_confirmed: true
     verified: false
+    notes: corrected from /pages/dealers
 
   - name: douglas
-    url: https://douglasoutdoors.com/dealers/
+    url: https://douglasoutdoors.com/local-shops/
     kind: html
+    url_confirmed: true
     verified: false
+    notes: corrected from /dealers/; /online-dealers/ is a second list
 
   - name: tfo
-    url: https://tforods.com/pages/dealer-locator
+    url: https://tforods.com/dealer-locator/
     kind: html
+    url_confirmed: true
     verified: false
+    notes: corrected from /pages/dealer-locator (WordPress path style, not Shopify)
 
   - name: echo
-    url: https://echoflyfishing.com/pages/dealers
+    url: https://echoflyfishing.com/dealers/
     kind: html
+    url_confirmed: true
     verified: false
+    notes: corrected from /pages/dealers. Rajeff Sports brand.
 
   - name: redington
-    url: https://redington.com/pages/dealer-locator
+    url: https://farbank.com/pages/redington/dealer-locator
     kind: html
+    url_confirmed: true
     verified: false
+    notes: >-
+      corrected from redington.com/pages/dealer-locator. Redington is a Far Bank brand and
+      the locator lives on farbank.com. If this proves to be the same dataset as the Sage
+      and RIO locators, collapse all three into one farbank entry rather than crawling the
+      same dealer list three times.
 
   - name: ross_reels
-    url: https://rossreels.com/pages/dealers
+    url: https://www.rossreels.com/find-a-dealer.html
     kind: html
+    url_confirmed: true
     verified: false
+    notes: >-
+      corrected from /pages/dealers. Mayfly Outdoors brand;
+      mayflyoutdoors.com/pages/ross-reels-dealer-locator is an alternate.
 
   - name: abel
-    url: https://abelreels.com/pages/dealers
+    url: https://abelreels.com/dealer-finder/
     kind: html
+    url_confirmed: true
     verified: false
+    notes: >-
+      corrected from /pages/dealers. Mayfly Outdoors brand (same parent as Ross and Airflo
+      USA) — the three lists may overlap heavily.
 
   - name: hatch
-    url: https://hatchoutdoors.com/pages/dealers
+    url: https://hatchoutdoors.com/pages/find-a-dealer
     kind: html
+    url_confirmed: true
     verified: false
+    notes: >-
+      corrected from /pages/dealers. Search results suggested the locator tool may be
+      partly broken; /pages/store-locator is the fallback.
 
   - name: nautilus
-    url: https://nautilusreels.com/pages/dealers
+    url: https://www.nautilusreels.com/dealers/
     kind: html
+    url_confirmed: true
     verified: false
+    notes: original guess (/pages/dealers) also resolves; both map and list view
 
   - name: rio
-    url: https://www.rioproducts.com/pages/dealer-locator
+    url: https://farbank.com/pages/dealer-locator
     kind: html
+    url_confirmed: true
     verified: false
+    notes: >-
+      corrected from rioproducts.com/pages/dealer-locator. RIO is a Far Bank brand; this is
+      the shared Far Bank locator covering Sage, Redington and RIO. See the redington entry
+      about collapsing these.
 
   - name: scientific_anglers
-    url: https://www.scientificanglers.com/pages/dealer-locator
+    url: https://scientificanglers.com/dealer-locator/
     kind: html
+    url_confirmed: true
     verified: false
+    notes: corrected from /pages/dealer-locator (path style, not Shopify)
 
   - name: airflo
-    url: https://airflousa.com/pages/dealers
+    url: https://airflousa.com/airflo-usa-dealer-locator
     kind: html
+    url_confirmed: true
     verified: false
+    notes: corrected from /pages/dealers. Mayfly Outdoors brand.
 
   - name: fishpond
-    url: https://fishpondusa.com/pages/dealers
+    url: https://fishpondusa.com/pages/dealer-locator
     kind: html
+    url_confirmed: true
     verified: false
+    notes: corrected from /pages/dealers; fishpondusa.com/dealers/ is an alternate view
 
   - name: umpqua
-    url: https://umpqua.com/pages/dealer-locator
+    url: https://www.umpqua.com/dealer-locator/
     kind: html
+    url_confirmed: true
     verified: false
+    notes: >-
+      corrected from /pages/dealer-locator. Uses the Storemapper widget, so expect
+      kind:json — Storemapper exposes a store-list endpoint far easier to parse than the
+      rendered page.
 
   - name: loon_outdoors
-    url: https://www.loonoutdoors.com/pages/dealers
+    url: https://loonoutdoors.com/pages/store-locator
     kind: html
+    url_confirmed: true
     verified: false
+    notes: >-
+      corrected from /pages/dealers. /pages/international-store-locator is separate and out
+      of scope for a US market study.
 
   - name: costa
-    url: https://www.costadelmar.com/en-us/store-locator
+    url: https://www.costadelmar.com/en-us/stores
     kind: html
+    url_confirmed: true
     verified: false
+    notes: >-
+      corrected from /en-us/store-locator. Costa is broadly distributed through optical and
+      big-box retail, so expect a lower signal-to-noise ratio than the rod brands.
 
   - name: smith
-    url: https://www.smithoptics.com/en_US/dealer-locator
+    url: https://www.smithoptics.com/en-us/pages/find-a-store
     kind: html
+    url_confirmed: true
     verified: false
+    notes: >-
+      corrected from /en_US/dealer-locator. Uses Locally (locally.com), same as Sage —
+      expect kind:json. Same broad-distribution caveat as Costa.
 
   - name: yeti
-    url: https://www.yeti.com/dealer-locator.html
+    url: https://www.yeti.com/find-a-store
     kind: html
+    url_confirmed: true
     verified: false
+    notes: >-
+      corrected from /dealer-locator.html. Very broadly distributed (hardware, big-box);
+      the §3 chain exclusions will do a lot of work on this one.
 
   - name: patagonia
-    url: https://www.patagonia.com/dealer-locator.html
+    url: https://www.patagonia.com/small-business-locator.html
     kind: html
+    url_confirmed: true
     verified: false
+    notes: >-
+      corrected from /dealer-locator.html. Deliberately the small-business/dealer locator,
+      NOT /store-locator/, which returns Patagonia's own retail stores — the same
+      company-owned-versus-dealer distinction §3 calls out for Orvis.
 
   - name: howler_bros
-    url: https://howlerbros.com/pages/stockists
+    url: https://howlerbros.com/pages/dealer-locator
     kind: html
+    url_confirmed: true
     verified: false
+    notes: corrected from /pages/stockists
 
   - name: korkers
-    url: https://korkers.com/pages/dealer-locator
+    url: https://korkers.com/pages/store-locator
     kind: html
+    url_confirmed: true
     verified: false
+    notes: corrected from /pages/dealer-locator; /pages/online-dealers is a second list
 
-  # §3: Orvis dealer network only. Company-owned Orvis stores are not prospects and are
-  # filtered by the manufacturer exclusion on orvis.com itself.
   - name: orvis_dealers
-    url: https://www.orvis.com/dealer-locator
+    url: https://stores.orvis.com/search
     kind: html
+    url_confirmed: true
     verified: false
-    notes: dealer network only, not company-owned retail
-
-  - name: hareline
-    url: https://hareline.com/pages/dealers
-    kind: html
-    verified: false
+    notes: >-
+      corrected from orvis.com/dealer-locator. IMPORTANT: this index mixes Orvis-owned
+      retail and outlet stores with independent authorized dealers. §3 wants the dealer
+      network only, so results must be filtered by store type before entering the universe.
+      orvis.com itself is already excluded as a manufacturer, but the company-owned store
+      locations are not prospects either.
 
   - name: whiting_farms
-    url: https://whitingfarms.com/pages/dealers
+    url: https://whitingfarms.com/us_deal_loc.htm
     kind: html
+    url_confirmed: true
     verified: false
+    notes: >-
+      corrected from /pages/dealers. Static .htm on an older site, so this is the likeliest
+      of the set to be a plain HTML list that harvests cleanly on the first try. Start here
+      when testing the harvester.
 
   - name: semperfli
-    url: https://semperfli.net/pages/stockists
+    url: https://www.semperfli.net/locator.html
     kind: html
+    url_confirmed: true
     verified: false
+    notes: corrected from /pages/stockists
 
   - name: fulling_mill
-    url: https://www.fullingmill.com/pages/dealers
+    url: https://www.fullingmill.com/Dealer-Locator-US
     kind: html
+    url_confirmed: true
     verified: false
+    notes: >-
+      corrected from /pages/dealers. US locator; fullingmill.co.uk/Dealer-Locator-UK is the
+      UK equivalent and is out of scope.
+
+  # Hareline is in the §3 brand list but has no public dealer locator that could be found.
+  # Their published position is that they do not sell to the public and to "support your
+  # local Hareline dealer", with no locator tool behind it. Left disabled rather than
+  # pointed at a guessed URL. If one turns up, add it — Hareline overlap is a strong
+  # signal, since a shop carrying Hareline is a shop with a real fly-tying wall.
+  - name: hareline
+    url: https://www.hareline.com/
+    kind: html
+    url_confirmed: false
+    verified: false
+    enabled: false
+    notes: >-
+      NO PUBLIC LOCATOR FOUND. Homepage only, harvesting disabled. Do not enable without
+      finding a real dealer list; harvesting a brand homepage yields noise, not dealers.
 
 # AFFTA (§3): only a publicly published member directory may be used, and only what an
-# anonymous browser can see. No membership data, roster, or list obtained through the
-# advisory relationship goes in this file or anywhere else in this repo. No entry is
-# listed here because none was confirmed to be public; add one only after verifying it
-# is reachable while logged out.
+# anonymous browser can see. Nothing obtained through the advisory relationship goes in
+# this file or anywhere else in this repo. No entry is listed because none was confirmed
+# public. If one exists, verify it while logged out before adding it.

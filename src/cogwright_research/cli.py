@@ -33,10 +33,19 @@ async def cmd_universe(args: argparse.Namespace, paths: Paths) -> int:
 
     specs = load_locator_specs(paths.reference / "dealer_locators.yaml")
     if specs and not args.no_locators:
+        unverified = [s.name for s in specs if not s.verified]
+        if unverified:
+            # Not fatal — an unverified locator still gets harvested — but a run that
+            # returns few domains is usually a payload-shape problem, not a market fact.
+            log.warning(
+                "%d/%d locators are unverified (payload shape unconfirmed): %s",
+                len(unverified), len(specs), ", ".join(unverified),
+            )
         async with PoliteFetcher() as fetcher:
             for spec in specs:
                 added = await harvest_locator(fetcher, spec, universe)
-                log.info("locator %-22s +%d domains", spec.name, added)
+                flag = "" if spec.verified else "  [unverified]"
+                log.info("locator %-22s +%d domains%s", spec.name, added, flag)
     elif not specs:
         log.warning("no dealer_locators.yaml entries; universe is seed-only")
 
