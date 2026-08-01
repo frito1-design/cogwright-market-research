@@ -1,0 +1,102 @@
+# Bootstrap seed list for Stage 1 (CW-RES-001 §3).
+#
+# THESE DOMAINS ARE UNVERIFIED. They were written from recall, without network access to
+# confirm that any of them resolves. Treat this file as a way to get the pipeline moving
+# on day one, not as market data and not as a substitute for the dealer-locator harvest,
+# which is the actual primary source in §3.
+#
+# This is safe to run precisely because Stage 2 is the validator: a domain that does not
+# resolve, has no e-commerce signal, or is a guide service gets excluded automatically.
+# A wrong guess here costs one HTTP request. It cannot contaminate the scored output.
+#
+# Expect meaningful attrition on the first pass. The §12 target of 600-900 candidates is
+# reached by the locator harvest, not by this file.
+#
+# Columns: domain, source
+domain,source
+tcoflyfishing.com,seed:recall
+schultzoutfitters.com,seed:recall
+charliesflyboxinc.com,seed:recall
+bluequillangler.com,seed:recall
+duranglers.com,seed:recall
+troutsflyfishing.com,seed:recall
+anglersall.com,seed:recall
+vailvalleyanglers.com,seed:recall
+taylorcreek.com,seed:recall
+frontrangeanglers.com,seed:recall
+royalgorgeanglers.com,seed:recall
+minturnanglers.com,seed:recall
+theflyfisher.com,seed:recall
+kirksflyshop.com,seed:recall
+anglerscovey.com,seed:recall
+rockymountainanglers.com,seed:recall
+flyfishingoutfitters.net,seed:recall
+blackfootriver.com,seed:recall
+grizzlyhackle.com,seed:recall
+theriversedge.com,seed:recall
+bigskyanglers.com,seed:recall
+madisonriverfishingcompany.com,seed:recall
+yellowstoneangler.com,seed:recall
+sweetwaterflyshop.com,seed:recall
+crosscurrents.com,seed:recall
+headhuntersflyshop.com,seed:recall
+wolfcreekangler.com,seed:recall
+trouthunt.com,seed:recall
+jimmysallseasonangler.com,seed:recall
+silvercreekoutfitters.com,seed:recall
+picabooangler.com,seed:recall
+fishheadsofthegreen.com,seed:recall
+westernrivers.com,seed:recall
+fourseasonsflyfishers.com,seed:recall
+fishwest.com,seed:recall
+jdhighcountryoutfitters.com,seed:recall
+worldcastanglers.com,seed:recall
+northforkanglers.com,seed:recall
+theuglybugflyshop.com,seed:recall
+platteriverflyshop.com,seed:recall
+theflyfishersplace.com,seed:recall
+royaltreatmentflyfishing.com,seed:recall
+gorgeflyshop.com,seed:recall
+deschutesangler.com,seed:recall
+caddisflyshop.com,seed:recall
+flyandfield.com,seed:recall
+flyfishusa.com,seed:recall
+confluenceflyshop.com,seed:recall
+pacificflyfishers.com,seed:recall
+redsflyshop.com,seed:recall
+theeveninghatch.com,seed:recall
+theflyshop.com,seed:recall
+lostcoastoutfitters.com,seed:recall
+kienesflyshop.com,seed:recall
+troutfitter.com,seed:recall
+fishermansspot.com,seed:recall
+taosflyshop.com,seed:recall
+highdesertangler.com,seed:recall
+nomadanglers.com,seed:recall
+driftlessangler.com,seed:recall
+feathercraft.com,seed:recall
+mossycreekflyfishing.com,seed:recall
+albemarleangler.com,seed:recall
+southholstonriverflyshop.com,seed:recall
+littleriveroutfitters.com,seed:recall
+davidsonriveroutfitters.com,seed:recall
+hunterbanks.com,seed:recall
+unicoioutfitters.com,seed:recall
+cohuttafishingco.com,seed:recall
+upcountrysportfishing.com,seed:recall
+housatonicriveroutfitters.com,seed:recall
+catskillflies.com,seed:recall
+shannonsflyandtackle.com,seed:recall
+tightlinesflyshop.com,seed:recall
+eldredgebros.com,seed:recall
+thebearsden.com,seed:recall
+concordoutfitters.com,seed:recall
+greatfeathers.com,seed:recall
+backwaterangler.com,seed:recall
+flyfishersparadise.com,seed:recall
+livingwatersflyfishing.com,seed:recall
+gruenoutfitters.com,seed:recall
+avidangler.com,seed:recall
+mossysflyshop.com,seed:recall
+alaskaflyfishinggoods.com,seed:recall
+theessentialflyfisher.com,seed:recall

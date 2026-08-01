@@ -1,0 +1,183 @@
+# Brand dealer locators — Stage 1 primary source (CW-RES-001 §3).
+#
+# READ THIS BEFORE THE FIRST RUN.
+#
+# Every `url` below is UNVERIFIED (`verified: false`). They were written from the brand
+# list in §3 without network access to confirm them, so treat each as a starting guess,
+# not a fact. Dealer locators move, and a good share of them are JavaScript front-ends
+# over a JSON endpoint that this file cannot know the shape of until someone opens the
+# page with devtools.
+#
+# Working procedure for each brand:
+#   1. Open the locator in a browser and confirm it lists retailers with websites.
+#   2. If the dealer list arrives over XHR, switch `kind` to `json`, set `array_path`
+#      and `website_key` from the payload, and point `url` at the endpoint.
+#   3. Set `verified: true`.
+#
+# `harvest_locator` fetches these through the same polite client as everything else, so
+# a wrong URL costs one 404 and a log line, not a rate-limit ban. Unverified entries are
+# still harvested — a wrong guess is cheap and a right one is free.
+#
+# The point of recording which locators a domain appeared on is that the list is itself a
+# scoring input: a shop on the Simms *and* Fishpond *and* Sage locators has a vendor mix
+# Cogwright already has mappings for, and 8+ appearances earns the §8 modifier.
+
+locators:
+  - name: simms
+    url: https://www.simmsfishing.com/pages/dealer-locator
+    kind: html
+    verified: false
+
+  - name: sage
+    url: https://sageflyfish.com/pages/dealer-locator
+    kind: html
+    verified: false
+
+  - name: scott
+    url: https://www.scottflyrod.com/pages/dealers
+    kind: html
+    verified: false
+
+  - name: winston
+    url: https://winstonrods.com/pages/dealers
+    kind: html
+    verified: false
+
+  - name: thomas_and_thomas
+    url: https://thomasandthomas.com/pages/dealers
+    kind: html
+    verified: false
+
+  - name: douglas
+    url: https://douglasoutdoors.com/dealers/
+    kind: html
+    verified: false
+
+  - name: tfo
+    url: https://tforods.com/pages/dealer-locator
+    kind: html
+    verified: false
+
+  - name: echo
+    url: https://echoflyfishing.com/pages/dealers
+    kind: html
+    verified: false
+
+  - name: redington
+    url: https://redington.com/pages/dealer-locator
+    kind: html
+    verified: false
+
+  - name: ross_reels
+    url: https://rossreels.com/pages/dealers
+    kind: html
+    verified: false
+
+  - name: abel
+    url: https://abelreels.com/pages/dealers
+    kind: html
+    verified: false
+
+  - name: hatch
+    url: https://hatchoutdoors.com/pages/dealers
+    kind: html
+    verified: false
+
+  - name: nautilus
+    url: https://nautilusreels.com/pages/dealers
+    kind: html
+    verified: false
+
+  - name: rio
+    url: https://www.rioproducts.com/pages/dealer-locator
+    kind: html
+    verified: false
+
+  - name: scientific_anglers
+    url: https://www.scientificanglers.com/pages/dealer-locator
+    kind: html
+    verified: false
+
+  - name: airflo
+    url: https://airflousa.com/pages/dealers
+    kind: html
+    verified: false
+
+  - name: fishpond
+    url: https://fishpondusa.com/pages/dealers
+    kind: html
+    verified: false
+
+  - name: umpqua
+    url: https://umpqua.com/pages/dealer-locator
+    kind: html
+    verified: false
+
+  - name: loon_outdoors
+    url: https://www.loonoutdoors.com/pages/dealers
+    kind: html
+    verified: false
+
+  - name: costa
+    url: https://www.costadelmar.com/en-us/store-locator
+    kind: html
+    verified: false
+
+  - name: smith
+    url: https://www.smithoptics.com/en_US/dealer-locator
+    kind: html
+    verified: false
+
+  - name: yeti
+    url: https://www.yeti.com/dealer-locator.html
+    kind: html
+    verified: false
+
+  - name: patagonia
+    url: https://www.patagonia.com/dealer-locator.html
+    kind: html
+    verified: false
+
+  - name: howler_bros
+    url: https://howlerbros.com/pages/stockists
+    kind: html
+    verified: false
+
+  - name: korkers
+    url: https://korkers.com/pages/dealer-locator
+    kind: html
+    verified: false
+
+  # §3: Orvis dealer network only. Company-owned Orvis stores are not prospects and are
+  # filtered by the manufacturer exclusion on orvis.com itself.
+  - name: orvis_dealers
+    url: https://www.orvis.com/dealer-locator
+    kind: html
+    verified: false
+    notes: dealer network only, not company-owned retail
+
+  - name: hareline
+    url: https://hareline.com/pages/dealers
+    kind: html
+    verified: false
+
+  - name: whiting_farms
+    url: https://whitingfarms.com/pages/dealers
+    kind: html
+    verified: false
+
+  - name: semperfli
+    url: https://semperfli.net/pages/stockists
+    kind: html
+    verified: false
+
+  - name: fulling_mill
+    url: https://www.fullingmill.com/pages/dealers
+    kind: html
+    verified: false
+
+# AFFTA (§3): only a publicly published member directory may be used, and only what an
+# anonymous browser can see. No membership data, roster, or list obtained through the
+# advisory relationship goes in this file or anywhere else in this repo. No entry is
+# listed here because none was confirmed to be public; add one only after verifying it
+# is reachable while logged out.
