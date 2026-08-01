@@ -30,7 +30,7 @@ exactly as §5 requires for an undeterminable catalog.
 
 | Criterion | Status |
 |---|---|
-| ≥ 400 domains attempted | **Pending a run.** The universe currently holds 86 unverified seed domains; the dealer-locator harvest is what reaches 600–900, and it needs network. |
+| ≥ 400 domains attempted | **Pending a run.** The universe currently holds 86 unverified seed domains; the dealer-locator harvest is what reaches 600–900, and it needs network. The 29 enabled locator URLs are now confirmed, so that harvest should work — but their payload shapes are not, so how many domains it actually yields is untested. |
 | ≥ 250 classified by platform | **Pending a run.** |
 | ≥ 150 with catalog size determined | **Pending a run.** |
 | Zero robots.txt violations in the crawl log | **Enforced by construction and tested.** Disallowed paths are never issued; `violations()` re-audits the log against the rules. |
@@ -41,13 +41,34 @@ exactly as §5 requires for an undeterminable catalog.
 
 ## Before the first live run, do these three things
 
-**1. Verify the dealer locator URLs.** Every entry in `reference/dealer_locators.yaml` is
-`verified: false`. They were written from the brand list in §3 without network access to
-confirm them. Several are certainly wrong, and several more will be JavaScript front-ends
-over a JSON endpoint — open each in a browser, fix the URL, set `kind: json` with
-`array_path`/`website_key` where needed, and flip `verified: true`. This is the single
-highest-leverage hour of work on the project: Stage 1 is the input to everything else, and
-the locator harvest is what makes vendor overlap meaningful.
+**1. Finish verifying the dealer locators — the URLs are done, the payloads are not.**
+
+A search-index pass has corrected every URL in `reference/dealer_locators.yaml`. Of the 30
+brands, **2 of the original guessed URLs were right and 27 were wrong**; the pre-correction
+file would have produced a near-empty universe. Those 29 are now `url_confirmed: true`.
+Hareline is the 30th: no public dealer locator exists that could be found, so it is
+`enabled: false` rather than pointed at a guess.
+
+What is still missing is the payload shape. Nobody has opened these pages to confirm they
+list retailers **with website links** — a locator that yields only name, address and phone
+is useless here, because Stage 2 needs a domain — or to determine whether the list is in
+the HTML or arrives over XHR. So every entry remains `verified: false`, and that is the
+flag that matters before a real run. Work the list, set `kind: json` with
+`array_path`/`website_key` where the data arrives over XHR, and flip `verified: true`.
+
+Three shortcuts from the URL pass:
+
+- **Start with Whiting Farms** (`whitingfarms.com/us_deal_loc.htm`). A static `.htm` page on
+  an older site is the likeliest plain-HTML list in the set, so it is the cheapest way to
+  confirm the harvester works before fighting a JS widget.
+- **Known widgets, all `kind: json` work.** Sage and Smith use Locally (locally.com);
+  Umpqua uses Storemapper; Scott and Winston use Google Maps embeds. Identifying the widget
+  usually finds the endpoint faster than reading the page.
+- **Watch for shared and mixed lists.** Sage, RIO and Redington are all Far Bank and may
+  serve one dealer set from `farbank.com` — two entries already point there, so collapse
+  them if the data proves identical. Ross, Abel and Airflo are all Mayfly Outdoors and may
+  overlap similarly. And `stores.orvis.com` mixes Orvis-owned retail with independent
+  dealers; §3 wants the dealer network only, so those results need filtering by store type.
 
 **2. Treat `seeds/domains_seed.csv` as disposable.** Its 86 domains were written from
 recall and none has been confirmed to resolve. It exists to get the pipeline moving on day

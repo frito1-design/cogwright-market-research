@@ -217,16 +217,24 @@ class LocatorSpec:
     array_path: str = ""
     #: For kind=json, the key holding the dealer's website.
     website_key: str = "website"
-    #: False until a human has confirmed the URL resolves to a real dealer list.
+    #: True when the URL has been confirmed to exist and to be this brand's locator.
+    url_confirmed: bool = False
+    #: Stricter than url_confirmed: a human has opened the page and confirmed it lists
+    #: retailers *with website links*, and that `kind`/`array_path` match the payload.
     verified: bool = False
+    #: Set False to keep an entry on record without harvesting it — e.g. a brand with no
+    #: public dealer list, where a guessed URL would return noise rather than dealers.
+    enabled: bool = True
     notes: str = ""
 
 
-def load_locator_specs(path: Path) -> list[LocatorSpec]:
+def load_locator_specs(path: Path, *, include_disabled: bool = False) -> list[LocatorSpec]:
+    """Load the locator table. Disabled entries are skipped unless asked for."""
     if not Path(path).exists():
         return []
     raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
-    return [LocatorSpec(**entry) for entry in raw.get("locators", [])]
+    specs = [LocatorSpec(**entry) for entry in raw.get("locators", [])]
+    return specs if include_disabled else [s for s in specs if s.enabled]
 
 
 def extract_links_from_html(html: str, locator_url: str) -> list[str]:

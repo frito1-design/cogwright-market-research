@@ -1,9 +1,12 @@
+from pathlib import Path
+
 from cogwright_research.universe import (
     LocatorSpec,
     Universe,
     classify_exclusion,
     extract_links_from_html,
     extract_links_from_json,
+    load_locator_specs,
     normalize_domain,
 )
 
@@ -86,6 +89,48 @@ def test_extract_links_from_json_walks_the_configured_path():
 def test_extract_links_from_json_tolerates_a_wrong_path():
     spec = LocatorSpec(name="x", url="https://x.com", kind="json", array_path="nope.here")
     assert extract_links_from_json({"data": {}}, spec) == []
+
+
+def test_load_locator_specs_skips_disabled_entries(tmp_path):
+    path = tmp_path / "locators.yaml"
+    path.write_text(
+        "locators:\n"
+        "  - name: simms\n"
+        "    url: https://www.simmsfishing.com/pages/dealer-locator\n"
+        "    url_confirmed: true\n"
+        "  - name: hareline\n"
+        "    url: https://www.hareline.com/\n"
+        "    enabled: false\n",
+        encoding="utf-8",
+    )
+    enabled = load_locator_specs(path)
+    assert [s.name for s in enabled] == ["simms"]
+    assert enabled[0].url_confirmed is True
+    assert enabled[0].verified is False
+
+    everything = load_locator_specs(path, include_disabled=True)
+    assert [s.name for s in everything] == ["simms", "hareline"]
+
+
+def test_shipped_locator_table_parses_and_is_sane():
+    """The real reference file, not a fixture — a typo here silently guts Stage 1."""
+    path = Path(__file__).resolve().parents[1] / "reference" / "dealer_locators.yaml"
+    specs = load_locator_specs(path, include_disabled=True)
+
+    assert len(specs) == 30
+    assert len({s.name for s in specs}) == 30, "duplicate locator names"
+
+    for spec in specs:
+        assert spec.url.startswith("https://"), spec.name
+        assert normalize_domain(spec.url) is not None, spec.name
+        assert spec.kind in {"html", "json"}, spec.name
+        if spec.kind == "json":
+            assert spec.array_path, f"{spec.name}: json locator needs an array_path"
+        # Every enabled entry has a confirmed URL; the one that does not is disabled.
+        assert spec.url_confirmed or not spec.enabled, spec.name
+
+    # AFFTA must never appear — §3 permits only a confirmed-public directory.
+    assert not any("affta" in s.name.lower() for s in specs)
 
 
 def test_seed_csv_skips_comment_header(tmp_path):
