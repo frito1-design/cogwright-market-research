@@ -81,10 +81,11 @@ C61S, FM6045, FM8010, HR410, SL53U.
 - `002_offdoc_carry_candidates.sql` — carries both through `po_offdoc_skus` and
   `sweep_po_offdoc_skus` onto `po_offdoc_sku_alerts` (which *is* the §4.5 log — it already has
   the raw SKU, matched SKU, rule and a `resolved_at`; it only lacked the evidence).
-- `003_notify_off_po_skus.patch.ts` — the three new kinds in `statusText`. **Not optional, and
-  not yet deployed:** the function's own comment notes that an unlisted kind falls through to
-  "create it", so 001 without this makes the alert worse. The cron is `0 14-23 * * *` —
-  **hourly, ten times a day**, not daily.
+- `deployed/` — the edge function as shipped (`index.ts` plus its `_shared/notify.ts`
+  dependency), carrying the three new kinds in `statusText`. This was not optional: the
+  function's own comment notes that an unlisted kind falls through to "create it", so the SQL
+  without it would have made the alert worse. Kept as the whole file rather than a patch
+  fragment so there is one copy to drift from.
 - `004_suppress_lines_resolved_onto_the_po.sql` — the other half of the false positive, found
   during deployment. `doc_on_po` compares the *printed* SKU against the PO and never consults
   the match, so a line resolved to `HDN302SPR12` still counted as "not on the PO" even though
@@ -131,11 +132,17 @@ log must be inspectable) need a post-deploy `dry_run` sweep — see below.
 `dry_run` sweep returns `pending: 0` with all five PO-10458-WH / PO-10460-JM rows retired,
 each carrying its matched SKU and candidate set.
 
-**003 is NOT deployed.** Until it is, `prefix_desc`, `ozero` and `ambiguous` fall through
-`statusText`'s default and read "no match in Shopify — check before creating it" — while
-`in_shopify` is true, so the row is also coloured as found. Nothing is pending right now, so
-no such email is queued, but the cron is `0 14-23 * * *` (hourly) and any new off-PO line
-landing in one of those kinds would be described wrongly. Deploy 003 before that happens.
+**The edge function is deployed** — `notify_off_po_skus` v20, ACTIVE, `verify_jwt` still
+`false` so pg_cron can keep calling it with the sweep token. A post-deploy `dry_run` returns
+200 / `pending: 0`, which also confirms the function loads and the RPC's new shape matches.
+
+Note for anyone reading the brief: the cron is `0 14-23 * * *` — **hourly, ten times a day**,
+not the daily 09:00 the brief inferred from a single send.
+
+All nine match kinds were driven through the shipped `statusText`; only `none` reaches the
+default. The trigger case now reads *"in Shopify as HDN302SPR12 — truncated SKU, matched on
+the size in the description (chosen from 3 similar SKUs — verify) — check the size, then add
+the line"* (green) in place of *"no match in Shopify — check before creating it"* (red).
 
 Rollback is the previous `catalog_sku_match` / `po_offdoc_skus` / `sweep_po_offdoc_skus`
 bodies; the two added columns are nullable and can be left in place.
