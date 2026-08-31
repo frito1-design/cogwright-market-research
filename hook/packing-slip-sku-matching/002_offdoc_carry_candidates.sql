@@ -17,6 +17,9 @@ COMMENT ON COLUMN public.po_offdoc_sku_alerts.match_candidates IS
   'The candidate set considered. Populated for ambiguous rows and for fuzzy matches, so a match can be reviewed and reversed.';
 
 -- ---------------------------------------------------------------------------
+-- Both functions gain columns, so BOTH need dropping first: CREATE OR REPLACE
+-- cannot change a return type, and sweep_po_offdoc_skus changes too.
+DROP FUNCTION IF EXISTS public.sweep_po_offdoc_skus(uuid);
 DROP FUNCTION IF EXISTS public.po_offdoc_skus(uuid);
 
 CREATE FUNCTION public.po_offdoc_skus(p_po_id uuid)
@@ -128,7 +131,7 @@ AS $function$
 $function$;
 
 -- ---------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.sweep_po_offdoc_skus(p_tenant uuid)
+CREATE FUNCTION public.sweep_po_offdoc_skus(p_tenant uuid)
 RETURNS TABLE(po_id uuid, po_number text, vendor text, location_id text, sku text,
               description text, qty numeric, in_shopify boolean, invoice_number text,
               alert_id uuid, variant text, upc text, match_kind text, matched_sku text,

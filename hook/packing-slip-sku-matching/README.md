@@ -81,9 +81,17 @@ C61S, FM6045, FM8010, HR410, SL53U.
 - `002_offdoc_carry_candidates.sql` — carries both through `po_offdoc_skus` and
   `sweep_po_offdoc_skus` onto `po_offdoc_sku_alerts` (which *is* the §4.5 log — it already has
   the raw SKU, matched SKU, rule and a `resolved_at`; it only lacked the evidence).
-- `003_notify_off_po_skus.patch.ts` — the three new kinds in `statusText`. **Not optional:** the
-  function's own comment notes that an unlisted kind falls through to "create it", so shipping
-  001 without this would make the alert worse.
+- `003_notify_off_po_skus.patch.ts` — the three new kinds in `statusText`. **Not optional, and
+  not yet deployed:** the function's own comment notes that an unlisted kind falls through to
+  "create it", so 001 without this makes the alert worse. The cron is `0 14-23 * * *` —
+  **hourly, ten times a day**, not daily.
+- `004_suppress_lines_resolved_onto_the_po.sql` — the other half of the false positive, found
+  during deployment. `doc_on_po` compares the *printed* SKU against the PO and never consults
+  the match, so a line resolved to `HDN302SPR12` still counted as "not on the PO" even though
+  the PO carried `HDN302SPR12` at the same quantity. Without this, §8 check 3 fails: the four
+  SKUs still produce alert lines, merely better-labelled ones. Only a *resolved* match
+  suppresses — `ambiguous` has no `matched_sku`, and a genuinely new SKU can never be
+  suppressed at all.
 
 Two properties hold throughout:
 
@@ -115,22 +123,22 @@ again afterwards; every row must still say PASS. Current result — 9/9 PASS:
 That covers §8 checks 1–4. Checks 5 and 6 (the 2,990 genuinely-new SKUs must still alert; the
 log must be inspectable) need a post-deploy `dry_run` sweep — see below.
 
-## Deploying — not done
+## Deployment status
 
-These are DDL changes to the live database a warehouse works from, so they have not been
-applied. To ship:
+**001, 002 and 004 are APPLIED to production** (migrations
+`sku_match_tiers_stem_desc_ozero`, `offdoc_carry_match_candidates`,
+`offdoc_suppress_lines_resolved_onto_the_po`). Verified live: 10/10 on the matcher, and a
+`dry_run` sweep returns `pending: 0` with all five PO-10458-WH / PO-10460-JM rows retired,
+each carrying its matched SKU and candidate set.
 
-1. Apply `001`, then `002` (order matters — 002's `po_offdoc_skus` calls the new signature).
-2. Re-run `verify_before_deploy.sql`; expect 9/9 PASS.
-3. Patch and redeploy `notify_off_po_skus` with `003`.
-4. `POST /notify_off_po_skus` with `{"dry_run": true}` — reports what *would* be sent and
-   leaves `notified_at` alone. Confirm PO-10458-WH's four SKUs no longer appear, and that
-   genuinely-new SKUs still do (§8 checks 3 and 5).
-5. Spot-check `select sku, match_kind, matched_sku, candidate_count, match_candidates from
-   po_offdoc_sku_alerts where match_kind in ('prefix_desc','ozero','ambiguous')` (§8 check 6).
+**003 is NOT deployed.** Until it is, `prefix_desc`, `ozero` and `ambiguous` fall through
+`statusText`'s default and read "no match in Shopify — check before creating it" — while
+`in_shopify` is true, so the row is also coloured as found. Nothing is pending right now, so
+no such email is queued, but the cron is `0 14-23 * * *` (hourly) and any new off-PO line
+landing in one of those kinds would be described wrongly. Deploy 003 before that happens.
 
-Rollback is the previous `catalog_sku_match` / `po_offdoc_skus` bodies; the two added columns
-are nullable and can be left in place.
+Rollback is the previous `catalog_sku_match` / `po_offdoc_skus` / `sweep_po_offdoc_skus`
+bodies; the two added columns are nullable and can be left in place.
 
 ## Still open (brief §6, not addressed here)
 
